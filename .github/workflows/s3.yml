@@ -157,5 +157,5 @@ jobs:
         env:
           RESOURCE_PATH: ${{ env.RESOURCE_PATH }}
         run: |
-        cd dev/$RESOURCE_PATH
-        terraform apply -input=false -auto-approve=true plan.tfplan
+          cd dev/$RESOURCE_PATH
+          terraform apply -input=false -auto-approve=true plan.tfplan

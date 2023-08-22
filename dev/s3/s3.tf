@@ -17,3 +17,4 @@ module "s3_input" {
 
   tags = local.tags
 }
+
