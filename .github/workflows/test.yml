@@ -48,15 +48,19 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-      - name: Terraform Apply
-        run: terraform apply
-        # Aquí agregamos la estrategia de aprobación manual
-        # para que el trabajo quede en espera de aprobación
-        strategy:
-          matrix:
-            include:
-              - name: Aprobar
-                approval: true
-        # Configuramos la estrategia para esperar a que se apruebe manualmente
-        # antes de continuar con los otros trabajos en el flujo de trabajo
-        fail-fast: false
+      - name: Wait for approval
+        run: echo "Waiting for manual approval..."
+      # Aquí es donde se requiere la aprobación manual
+      # Puedes usar un comentario para indicar que se debe aprobar
+      - name: Request Manual Approval
+        id: approval
+        run: echo "Approve this workflow by commenting '/approve' on the pull request."
+      
+  manual_approval:
+    needs: terraform_apply
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && contains(github.event.pull_request.body, '/approve')
+    steps:
+      - name: Manual approval granted
+        run: echo "Manual approval granted. Running Terraform Apply."
+        # Aquí es donde puedes ejecutar el terraform apply
