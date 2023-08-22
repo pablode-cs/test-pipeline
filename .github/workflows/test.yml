@@ -1,14 +1,12 @@
 name: CI/CD Test
 
 on:
-  push:
-    branches:
-      - main
-  workflow_run:
-    workflows:
-      - "CI/CD Test"
-    types:
-      - requested
+  workflow_dispatch:
+    inputs:
+      approval:
+        description: 'Manual approval'
+        required: true
+        type: boolean
 
 jobs:
   # setup:
@@ -50,11 +48,20 @@ jobs:
 
   terraform_apply:
     runs-on: ubuntu-latest
-    if: github.run_number == github.event.workflow_run.conclusion  # Se ejecuta solo cuando se activa manualmente
     needs:
       - terraform_plan
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-      - name: Terraform Apply
-        run: echo "Corre terraform apply"
+      - name: Wait for manual approval
+        run: echo "Waiting for manual approval..."
+    if: github.event.inputs.approval == 'true'  # Se ejecuta solo cuando se activa manualmente y se aprueba
+
+  approve_terraform_apply:
+    runs-on: ubuntu-latest
+    needs:
+      - terraform_apply
+    steps:
+      - name: Approve Terraform Apply
+        run: |
+          # Agregar lógica aquí para realizar aprobación de despliegue
