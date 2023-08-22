@@ -81,12 +81,11 @@ jobs:
           terraform plan -input=false -out=plan.tfplan
       - name: Save plan artifact
         id: save-artifacts
-        env:
-          RESOURCE_PATH: ${{ env.RESOURCE_PATH }}
         uses: actions/upload-artifact@v2
         with:
           name: tf-plan
-          path: dev/$RESOURCE_PATH/plan.tfplan
+          path: dev/tfstate/plan.tfplan
+          if-no-files-found: error
 
   tf-apply:
     name: Terraform Apply
@@ -100,14 +99,13 @@ jobs:
     steps:
       - name: Download plan artifact
         id: download-artifacts
-        env:
-          RESOURCE_PATH: ${{ env.RESOURCE_PATH }}
         uses: actions/download-artifact@v2
         with:
           name: tf-plan
-          path: dev/$RESOURCE_PATH/plan.tfplan
+          path: dev/tfstate/plan.tfplan
+          if-no-files-found: error
       - name: Terraform Apply
         id: apply
         run: |
           cd dev/$RESOURCE_PATH
-          terraform apply -input=false -auto-approve=true plan.tfplan
+          terraform apply -input=false -auto-approve=true dev/tfstate/plan.tfplan
