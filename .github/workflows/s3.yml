@@ -79,50 +79,11 @@ jobs:
         run: |
           cd dev/$RESOURCE_PATH
           terraform plan -input=false -out=plan.tfplan
-
-  tf-plan-destroy:
-    name: Terraform Plan Destroy
-    needs: tf-setup
-    permissions:
-      id-token: write
-      contents: read
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Code
-        id: checkout
-        uses: actions/checkout@v3
-      - name: Configure AWS Credentials
-        id: creds
-        uses: aws-actions/configure-aws-credentials@v1
+      - name: Save plan artifact
+        uses: actions/upload-artifact@v2
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
-      - name: Setup SSH Key for Terraform Modules
-        id: ssh
-        env:
-          TF_DEPLOY_KEY: ${{ env.DEPLOY_KEY }}
-        run: |
-          mkdir -p ~/.ssh
-          echo "$TF_DEPLOY_KEY" | tr -d '\r' > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
-          eval $(ssh-agent -s)
-          ssh-add ~/.ssh/id_ed25519
-          ssh-keyscan -H github.com >> ~/.ssh/known_hosts
-      - name: Terraform Init
-        id: init
-        env:
-          RESOURCE_PATH: ${{ env.RESOURCE_PATH }}
-        run: |
-          cd dev/$RESOURCE_PATH
-          terraform init
-      - name: Terraform Plan Destroy
-        id: plan-destroy
-        env:
-          RESOURCE_PATH: ${{ env.RESOURCE_PATH }}
-        run: |
-          cd dev/$RESOURCE_PATH
-          terraform plan -input=false -destroy -out=plan-destroy.tfplan
+          name: tf-plan
+          path: dev/$RESOURCE_PATH/plan.tfplan
 
   tf-apply:
     name: Terraform Apply
@@ -134,26 +95,13 @@ jobs:
     environment:
       name: dev
     steps:
+      - name: Download plan artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: tf-plan
+          path: dev/$RESOURCE_PATH/plan.tfplan
       - name: Terraform Apply
         id: apply
-        env:
-          RESOURCE_PATH: ${{ env.RESOURCE_PATH }}
-        run: |
-          cd dev/$RESOURCE_PATH
-          terraform apply -input=false -auto-approve=true plan.tfplan
-
-  tf-destroy:
-    name: Terraform Destroy
-    needs: tf-plan-destroy
-    permissions:
-      id-token: write
-      contents: read
-    runs-on: ubuntu-latest
-    environment:
-      name: dev
-    steps: 
-      - name: Terraform Destroy
-        id: destroy
         env:
           RESOURCE_PATH: ${{ env.RESOURCE_PATH }}
         run: |
