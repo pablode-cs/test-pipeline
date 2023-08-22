@@ -48,7 +48,7 @@ jobs:
     needs:
       - terraform_plan
     environment:
-        name: env
+        name: dev
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
