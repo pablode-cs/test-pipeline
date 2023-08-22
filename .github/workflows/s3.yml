@@ -79,9 +79,7 @@ jobs:
         run: |
           cd dev/$RESOURCE_PATH
           terraform plan -input=false -out=plan.tfplan
-          # Save the plan artifact
-          mv plan.tfplan $GITHUB_WORKSPACE/plan.tfplan
-          echo "::set-output name=plan_path::$GITHUB_WORKSPACE/plan.tfplan"
+          echo "plan_path=$GITHUB_WORKSPACE/plan.tfplan" >> $GITHUB_ENV
 
   tf-apply:
     name: Terraform Apply
@@ -95,13 +93,12 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v2
-      - name: Download Plan Artifact
-        uses: actions/download-artifact@v2
-        with:
-          name: plan-artifact
+      - name: Set up Environment
+        run: echo "plan_path=${{ needs.tf-plan-apply.outputs.plan_path }}" >> $GITHUB_ENV
       - name: Terraform Apply
         id: apply
+        env:
+          RESOURCE_PATH: ${{ env.RESOURCE_PATH }}
         run: |
           cd dev/$RESOURCE_PATH
-          terraform apply -input=false -auto-approve=true ${{ steps.apply.outputs.plan_path }}
-
+          terraform apply -input=false -auto-approve=true ${{ env.plan_path }}
