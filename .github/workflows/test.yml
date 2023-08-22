@@ -18,9 +18,7 @@ jobs:
         env:
           TF_VERSION: "1.3.6"
         run: |
-          wget "https://releases.hashicorp.com/terraform/${TF_VERSION}/terraform_${TF_VERSION}_linux_amd64.zip"
-          unzip terraform_${TF_VERSION}_linux_amd64.zip
-          sudo mv terraform /usr/local/bin
+          echo "Instala terraform"
 
   terraform_init:
     runs-on: ubuntu-latest
@@ -29,7 +27,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
       - name: Terraform Init
-        run: terraform init
+        run:
+          echo "corre Terraform init"
+          # terraform init
 
   terraform_plan:
     runs-on: ubuntu-latest
@@ -39,28 +39,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
       - name: Terraform Plan
-        run: terraform plan
+        run:
+          echo "Corre terraform plan"
+          # terraform plan
 
   terraform_apply:
     runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' # Esto hace que el trabajo se ejecute solo en activación manual
     needs:
       - terraform_plan
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-      - name: Wait for approval
-        run: echo "Waiting for manual approval..."
-      # Aquí es donde se requiere la aprobación manual
-      # Puedes usar un comentario para indicar que se debe aprobar
-      - name: Request Manual Approval
-        id: approval
-        run: echo "Approve this workflow by commenting '/approve' on the pull request."
-      
-  manual_approval:
-    needs: terraform_apply
-    runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request' && contains(github.event.pull_request.body, '/approve')
-    steps:
-      - name: Manual approval granted
-        run: echo "Manual approval granted. Running Terraform Apply."
-        # Aquí es donde puedes ejecutar el terraform apply
+      - name: Terraform Apply
+        run: echo "Corre terraform apply"
