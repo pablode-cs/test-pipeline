@@ -45,9 +45,10 @@ jobs:
 
   terraform_apply:
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch' # Esto hace que el trabajo se ejecute solo en activación manual
     needs:
       - terraform_plan
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
       - name: Terraform Apply
         run: echo "Corre terraform apply"
