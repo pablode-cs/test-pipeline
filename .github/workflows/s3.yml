@@ -79,13 +79,9 @@ jobs:
         run: |
           cd dev/$RESOURCE_PATH
           terraform plan -input=false -out=plan.tfplan
-      - name: Save plan artifact
-        id: save-artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: tf-plan
-          path: dev/tfstate/plan.tfplan
-          if-no-files-found: error
+          # Save the plan artifact
+          mv plan.tfplan $GITHUB_WORKSPACE/plan.tfplan
+          echo "::set-output name=plan_path::$GITHUB_WORKSPACE/plan.tfplan"
 
   tf-apply:
     name: Terraform Apply
@@ -97,15 +93,15 @@ jobs:
     environment:
       name: dev
     steps:
-      - name: Download plan artifact
-        id: download-artifacts
+      - name: Checkout Code
+        uses: actions/checkout@v2
+      - name: Download Plan Artifact
         uses: actions/download-artifact@v2
         with:
-          name: tf-plan
-          path: dev/tfstate/plan.tfplan
-          if-no-files-found: error
+          name: plan-artifact
       - name: Terraform Apply
         id: apply
         run: |
           cd dev/$RESOURCE_PATH
-          terraform apply -input=false -auto-approve=true dev/tfstate/plan.tfplan
+          terraform apply -input=false -auto-approve=true ${{ steps.apply.outputs.plan_path }}
+
