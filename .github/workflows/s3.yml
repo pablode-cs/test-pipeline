@@ -102,8 +102,6 @@ jobs:
           path: dev/$RESOURCE_PATH/plan.tfplan
       - name: Terraform Apply
         id: apply
-        env:
-          RESOURCE_PATH: ${{ env.RESOURCE_PATH }}
         run: |
           cd dev/$RESOURCE_PATH
           terraform apply -input=false -auto-approve=true plan.tfplan
