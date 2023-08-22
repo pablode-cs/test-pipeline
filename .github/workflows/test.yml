@@ -4,37 +4,42 @@ on:
   push:
     branches:
       - main
+  workflow_run:
+    workflows:
+      - "CI/CD Test"
+    types:
+      - requested
 
 jobs:
-  setup:
-    name: Setup Terraform
-    permissions:
-      id-token: write
-      contents: read
-    runs-on: ubuntu-latest
-    steps:
-      - name: Install terraform
-        id: install
-        env:
-          TF_VERSION: "1.3.6"
-        run: |
-          echo "Instala terraform"
+  # setup:
+  #   name: Setup Terraform
+  #   permissions:
+  #     id-token: write
+  #     contents: read
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Install terraform
+  #       id: install
+  #       env:
+  #         TF_VERSION: "1.3.6"
+  #       run: |
+  #         echo "Instala terraform"
 
-  terraform_init:
-    runs-on: ubuntu-latest
-    needs: setup
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-      - name: Terraform Init
-        run:
-          echo "corre Terraform init"
-          # terraform init
+  # terraform_init:
+  #   runs-on: ubuntu-latest
+  #   needs: setup
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v2
+  #     - name: Terraform Init
+  #       run:
+  #         echo "corre Terraform init"
+  #         # terraform init
 
   terraform_plan:
     runs-on: ubuntu-latest
-    needs:
-      - terraform_init
+    # needs:
+    #   - terraform_init
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -45,6 +50,7 @@ jobs:
 
   terraform_apply:
     runs-on: ubuntu-latest
+    if: github.run_number == github.event.workflow_run.conclusion  # Se ejecuta solo cuando se activa manualmente
     needs:
       - terraform_plan
     steps:
