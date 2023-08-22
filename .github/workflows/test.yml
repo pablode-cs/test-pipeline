@@ -57,8 +57,6 @@ jobs:
             include:
               - name: Aprobar
                 approval: true
-        run: |
-          echo "Test terraform apply"
         # Configuramos la estrategia para esperar a que se apruebe manualmente
         # antes de continuar con los otros trabajos en el flujo de trabajo
         fail-fast: false
