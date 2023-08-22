@@ -1,12 +1,9 @@
 name: CI/CD Test
 
 on:
-  workflow_dispatch:
-    inputs:
-      approval:
-        description: "Manual approval"
-        required: true
-        type: boolean
+  push:
+    branches:
+      - main
 
 jobs:
   setup:
@@ -55,4 +52,5 @@ jobs:
         uses: actions/checkout@v2
       - name: Wait for manual approval
         run: echo "Waiting for manual approval..."
-    if: github.event.inputs.approval == 'true' # Se ejecuta solo cuando se activa manualmente y se aprueba
+      - name: Approve Terraform Apply
+        run: echo "corre Terraform apply"
