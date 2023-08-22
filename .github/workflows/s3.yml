@@ -144,14 +144,14 @@ jobs:
 
   tf-destroy:
     name: Terraform Destroy
-    needs: tf-plan-apply
+    needs: tf-plan-destroy
     permissions:
       id-token: write
       contents: read
     runs-on: ubuntu-latest
     environment:
       name: dev
-    steps:
+    steps: 
       - name: Terraform Destroy
         id: destroy
         env:
